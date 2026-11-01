@@ -1,3 +1,3 @@
 # Resources
 
-Shared resources for future JonGates nodes. No model weights are required by the current nodes.
+Bridge server state and HTTP route registration. No model weights are required.

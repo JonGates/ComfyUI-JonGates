@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-jongates"
-version = "0.1.0"
+version = "0.2.0"
 description = "JonGates image utilities for ComfyUI"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}

@@ -60,7 +60,21 @@ git -C ComfyUI-JonGates pull --ff-only
 
 新增 JonGates 节点后，按同名插口重新连接并复制参数，保存为新工作流。
 本包不注册 `CutQwenImage21` 或 `BlueBoxRotateImage` 的别名，不会覆盖上游节点。
-BlueBox 的 Bridge 等其他节点仍由 BlueBox 提供。
+Bridge 也已独立迁移，使用 `JonGatesBridge`；BlueBox 的其他节点不受影响。
+
+## Bridge (JonGates)
+
+节点 ID：`JonGatesBridge`，分类：`JonGates`。将上游图片接到 `image`，可选对比图片接到 `reference`。
+
+- `block=never`：直接输出图像与遮罩。
+- `block=if_not_continued`：生成预览并阻断下游；在节点右键菜单选择“在 JONGATES 编辑器中打开”，编辑并保存，再点击节点的“继续”按钮放行。
+- 点击普通“运行”重新取上游图片；“继续”使用本次编辑后上传的图像和遮罩，只放行一次。
+- `reference` 仅供编辑器比较，不改变主输出，也不决定是否阻断。
+- 编辑器、HTTP 接口 `/jongates/bridge_*`、IndexedDB `JonGatesMaskEditorDB` 和临时目录 `JonGatesBridge` 独立于 BlueBox，可同时安装。
+- 当前只支持单图；预览与编辑回填沿用 8-bit RGB 图片格式，不是浮点像素无损透传。批次输入会明确报错。
+- 浏览器可能需要允许本站弹窗。重启后浏览器编辑记录仍可能存在，但服务器临时状态需要先运行节点重新建立。
+
+Bridge 的 UI 按钮与独立编辑器由本包提供，无需保留 BlueBox 的前端脚本。入口只扩展 `JonGatesBridge`，不修改其他插件的菜单或全局种子行为。
 
 `examples/jongates_image_tools.json` 是不含用户照片、模型路径的基础示例。导入后在 Load Image 中选择自己的图片。
 
@@ -71,9 +85,10 @@ ComfyUI-JonGates/
 ├── __init__.py             # 自动发现 nodes 下的节点模块
 ├── nodes/
 │   ├── cut_qwen_image_21.py
-│   └── rotate_image.py
-├── resources/             # 预留共享资源
-├── web/                   # 预留前端扩展
+│   ├── rotate_image.py
+│   └── bridge.py
+├── resources/             # Bridge 状态与 HTTP 接口
+├── web/                   # Bridge 入口和独立编辑器
 ├── examples/
 ├── tests/
 ├── extension.json
@@ -89,11 +104,12 @@ ComfyUI-JonGates/
 
 ```shell
 python -m unittest discover -s tests -v
+node tests/test_bridge_frontend.mjs
 ```
 
-测试包括独立注册、97 个分辨率档位及多种比例的尺寸对齐、真实张量裁切/补边、旋转往返和无效输入校验。无需加载生成模型。
+测试包括独立注册、97 个分辨率档位及多种比例的尺寸对齐、真实张量裁切/补边、旋转往返、Bridge 阻断/继续/遮罩/参考图、HTTP 接口和前端事件。无需加载生成模型。前端脚本测试不等于完整编辑器的人工视觉验收。
 
 ## 许可与来源
 
-MIT。Cut 和 Rotate 算法改编自 [ComfyUI-BlueBox](https://github.com/zhoutingxi/ComfyUI-BlueBox)，保留上游版权声明。
+MIT。Cut、Rotate 和 Bridge/编辑器改编自 [ComfyUI-BlueBox](https://github.com/zhoutingxi/ComfyUI-BlueBox)，保留上游版权声明。
 JonGates 的修改与包结构也以 MIT 发布。具体来源与版本见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

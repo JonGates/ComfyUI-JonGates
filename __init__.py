@@ -32,4 +32,14 @@ for _path in sorted((Path(__file__).parent / "nodes").glob("*.py")):
 
 _logger.info("[JonGates] Loaded %d nodes", len(NODE_CLASS_MAPPINGS))
 
+# ComfyUI imports extensions after creating PromptServer. Pure node unit tests
+# can import this package without loading the ComfyUI server or starting CUDA.
+_server_module = sys.modules.get("server")
+_server = getattr(getattr(_server_module, "PromptServer", None), "instance", None)
+if _server is not None and not getattr(_server, "_jongates_bridge_routes_registered", False):
+    from .resources.bridge_routes import register_routes
+
+    register_routes(_server.routes)
+    _server._jongates_bridge_routes_registered = True
+
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]

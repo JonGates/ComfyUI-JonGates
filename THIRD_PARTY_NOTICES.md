@@ -4,6 +4,12 @@
 [ComfyUI-BlueBox](https://github.com/zhoutingxi/ComfyUI-BlueBox), commit
 `e46a4b32d6360d8234f400357e21925a36f05fc5`.
 
+Bridge additions are adapted from the same revision's `bluebox_nodes.py`
+(Bridge class only), `bluebox_core.py`, `web/bluebox.js` (Bridge editor entry),
+and `web/mask-editor.html`. HTTP endpoints implement the same Bridge protocol
+under an independent namespace. The editor retains its inline Lucide icon
+attribution. All new branding, cache keys, node IDs and endpoints use JonGates.
+
 Local changes: independent JonGates registration and category, Cut resolution
 range 1024–4096, input validation, and explicit single-image rotation validation.
 The MIT notice below applies to these upstream-derived portions.
