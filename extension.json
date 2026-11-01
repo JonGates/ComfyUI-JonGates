@@ -1,8 +1,8 @@
 {
   "title": "ComfyUI-JonGates",
-  "description": "JonGates 图像处理节点：Qwen尺寸对齐裁切、旋转、Bridge编辑器。",
+  "description": "JonGates 图像处理节点：Qwen尺寸对齐裁切、旋转、Bridge编辑器、参考风格三开关。",
   "author": "JonGates",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "tags": [
     "image-processing",
     "qwen",

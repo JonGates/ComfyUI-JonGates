@@ -62,6 +62,16 @@ git -C ComfyUI-JonGates pull --ff-only
 本包不注册 `CutQwenImage21` 或 `BlueBoxRotateImage` 的别名，不会覆盖上游节点。
 Bridge 也已独立迁移，使用 `JonGatesBridge`；BlueBox 的其他节点不受影响。
 
+## 参考风格控制 (JonGates)
+
+节点 ID：`JonGatesReferenceStylePrompt`。将其 `prompt` 接入 Qwen Image 2.1 文本编码器；编码器的 `image_1` 接待编辑原图、`image_2` 接风格参考图。
+
+三个独立开关默认关闭：`change_scene`（场景可变）、`change_clothing`（服饰可变）、`change_pose`（姿势可变）。全部关闭时只要求迁移色彩、影调与光线氛围；分别开启时允许参考图影响对应内容。人物身份、发型、发饰、独立配饰和随身物品始终要求保留。
+
+`style_description` 可以连接参考图分析文本，也可以不接，由 Qwen 直接观察第二张图。`extra_instruction` 填写补充意图。
+
+这些开关生成明确的文字约束，**不是模型权重开关、遮罩或逐像素保护**。模型仍可能偏离指令；改变姿势或服饰时尤其需要检查身份和细节。该节点本身不读取图片，也不会修改分辨率。
+
 ## Bridge (JonGates)
 
 节点 ID：`JonGatesBridge`，分类：`JonGates`。将上游图片接到 `image`，可选对比图片接到 `reference`。
@@ -86,7 +96,8 @@ ComfyUI-JonGates/
 ├── nodes/
 │   ├── cut_qwen_image_21.py
 │   ├── rotate_image.py
-│   └── bridge.py
+│   ├── bridge.py
+│   └── reference_style.py
 ├── resources/             # Bridge 状态与 HTTP 接口
 ├── web/                   # Bridge 入口和独立编辑器
 ├── examples/
