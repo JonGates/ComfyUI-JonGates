@@ -1,0 +1,4 @@
+# These dependencies are normally provided by ComfyUI.
+torch
+numpy
+Pillow

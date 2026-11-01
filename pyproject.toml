@@ -1,0 +1,11 @@
+[project]
+name = "comfyui-jongates"
+version = "0.1.0"
+description = "JonGates image utilities for ComfyUI"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [{name = "JonGates"}]
+
+[project.urls]
+Repository = "https://github.com/JonGates/ComfyUI-JonGates"
+Issues = "https://github.com/JonGates/ComfyUI-JonGates/issues"

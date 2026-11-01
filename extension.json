@@ -1,0 +1,11 @@
+{
+  "title": "ComfyUI-JonGates",
+  "description": "JonGates 图像处理节点：Qwen尺寸对齐裁切与旋转。",
+  "author": "JonGates",
+  "version": "0.1.0",
+  "tags": [
+    "image-processing",
+    "qwen",
+    "utility"
+  ]
+}
