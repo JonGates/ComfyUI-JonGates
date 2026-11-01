@@ -64,7 +64,7 @@ Bridge 也已独立迁移，使用 `JonGatesBridge`；BlueBox 的其他节点不
 
 ## 参考风格控制 (JonGates)
 
-节点 ID：`JonGatesReferenceStylePrompt`。编码器的 `image_1` 接待编辑原图、`image_2` 接风格参考图。推荐将本节点的 `prompt` 交给支持双图的 PE 提示词优化器，连入同样的两张图，让 PE 将参考场景、服装、姿势和色彩写成具体内容；再将 PE 结果与本节点原指令拼接后送入编码器。直接用“参考图的风格”这类泛化指令，部分模型会几乎不改图。
+节点 ID：`JonGatesReferenceStylePrompt`。这是保留给旧工作流的文字控制节点。编码器的 `image_1` 接待编辑原图、`image_2` 接风格参考图；直接双图编辑可能复制参考人物，泛化指令也可能几乎不改图。新建姿态参考流程建议使用下方的结构化分析、编辑计划与外部姿态控制链。
 
 三个独立开关默认关闭：`change_scene`（场景可变）、`change_clothing`（服饰可变）、`change_pose`（姿势可变）。全部关闭时只要求迁移色彩、影调与光线氛围；开启时明确要求替换场景、衣服或调整姿势。人物身份、发型、发饰、独立配饰和随身物品始终要求保留。
 
@@ -73,6 +73,20 @@ Bridge 也已独立迁移，使用 `JonGatesBridge`；BlueBox 的其他节点不
 `style_description` 可以连接参考图分析文本，也可以不接，由 Qwen 直接观察第二张图。`extra_instruction` 填写补充意图。
 
 这些开关生成文字约束及建议的 LoRA 强度，**不是遮罩或逐像素保护**。模型和 PE 均可能偏离指令；改变姿势或服饰时尤其需要检查身份、配饰和细节。该节点本身不读取图片，也不会修改分辨率。
+
+## 参考编辑计划与姿态强度 (JonGates)
+
+节点 ID：`JonGatesReferenceAnalysis` 与 `JonGatesReferenceEditPlan`。前者使用已有 PE GGUF 和 mmproj 做双图结构化观察，输出原人物、原服饰、原物品、原场景、原姿势以及参考场景、参考服饰、参考姿态、参考影调九个 JSON 字段。后者按三个开关选择字段，关闭的参考服装/场景/姿势描述不会进入生成提示词。旧 `JonGatesReferenceStylePrompt` 保持兼容。
+
+建议连接：原图与参考图 → 双图结构化分析 → `reference_description`；编辑计划的 `prompt` → Qwen 编辑编码器。Qwen 的图片输入只接原人物照片。分析使用本机 `LLM` 目录的 PE-T2I GGUF 与 PE-I2I mmproj，需要已有支持 `Qwen35ChatHandler` 的 `llama-cpp-python`。本包不自动安装或升级 CUDA/llama 依赖。分析前释放 ComfyUI 已加载模型，分析结束关闭 LLM。
+
+- 场景、服装和姿势三个开关分别决定替换或保留的文字要求。
+- `pose_strength` 输出接 `ZImageFunControlnet` 的 `strength`。姿势开关关闭输出 0，开启输出设定强度（默认 1）。单独接文字输出不会产生空间姿态约束。
+- 参考图 → `DWPreprocessor`（关闭脸部关键点）→ 等比补边对齐原图处理尺寸 → ControlNet 的 `image`。
+- Qwen 2.1 Union 权重使用 `ModelPatchLoader` 加载；不使用普通 `ControlNetLoader`。需要另行安装 `comfyui_controlnet_aux` 并准备 DWPose 权重，这些不是本节点包的 Python 依赖。
+- 姿态图必须先预览。多人、遮挡、出画肢体可能导致骨架提取错误。关闭脸部关键点也不等于锁定身份。
+
+新模块首次安装后需要重启 ComfyUI 后端并刷新网页。开关组合、关闭字段隔离和强度输出有单元测试；生成效果仍受模型、参考骨架及描述准确度限制，不能保证换姿势后服装、身份和手持物逐项完全不变。分析器也可能误认物品，应查看 JSON 和最终提示词再判断问题。
 
 ## Bridge (JonGates)
 
@@ -99,7 +113,9 @@ ComfyUI-JonGates/
 │   ├── cut_qwen_image_21.py
 │   ├── rotate_image.py
 │   ├── bridge.py
-│   └── reference_style.py
+│   ├── reference_style.py
+│   ├── reference_analysis.py
+│   └── reference_edit_plan.py
 ├── resources/             # Bridge 状态与 HTTP 接口
 ├── web/                   # Bridge 入口和独立编辑器
 ├── examples/
